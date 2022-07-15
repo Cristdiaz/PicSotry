@@ -1,0 +1,307 @@
+Indicaciones
+Setup
+1. Desde el material de apoyo, descarga el proyecto manual_jam
+2. Revisa el proyecto partiendo por las rutas. Puedes revisar el archivo de rutas o
+directamente en la consola con rails routes.
+PicStory es una aplicación para que diversos usuarios guarden sus historias y puedan
+compartirlas, pero esta aplicación no está terminada, el cliente necesita:
+
+
+● Crear un modelo user con los campos name (string), email (string) y
+password_digest (string)(0,5 Puntos)
+
+rails new PicStory
+cd PicStory
+rails g model User name:string email:string password_digest:string
+rails g scaffold Story title:string picture:string content:text
+user:references
+rails db:migrate
+
+● Añadir el método has_secure_password al modelo User y agregar la gema bcrypt al
+Gemfile.
+
+Quitar los comentarios del Gemfile para la gema Bcrypt
+
+#User Active Model has_secure_password
+gem 'bcrypt', ~> 3.1.7'                 
+borramos hasta la , ?
+bundle
+
+
+app/models/user.rb
+class User < ApplicationRecord
+    has_secure_password
+    has_many :stories
+end 
+
+app/models/story.rb
+class Story < ApplicationRecord
+    belongs_to :user
+end
+
+
+● Añadir validación para que el campo email sea único.
+
+app/models/user.rb:
+class User < ApplicationRecord
+    has_secure_password
+    has_many :stories
+
+    validates :email, uniqueness: true
+end 
+
+
+● Generar las rutas necesarias para crear usuarios.
+Convertir la raíz de nuestro proyecto en la raíz de nuestras historias.
+
+config/routes.rb
+Rails.application.routes.draw do
+    resources :stories
+    root 'stories#index'
+    resources :users, only: [:new, :create, :show]
+end
+
+Hacer el controlador manual de user:
+Con rails routes en consola podemos ver las rutas de nuestros controladores.
+Solo piden 2 vistas para los usuarios, new (vista del formulario) y show
+(vista del perfil).
+
+En consola:
+rails g controller users new show
+
+
+
+● Se recomienda no usar la herramienta scaffolding y hacer los métodos y vistas
+manualmente.
+
+● Revisar las rutas creadas y actualizar el link del navbar para que el perfil de usuario
+apunte al show de users.
+
+Rails.application.routes.draw do
+    root 'stories#index'
+    resources :stories
+    resources :users, only: [:new, :create. :show]
+end
+
+
+Ir a Bootstrap y sacar el link para class. Hacer lo mismo con JS:
+en app/views/layouts/application.html.erb
+
+
+● Crear controlador y formulario para un nuevo usuario. El formulario debe ser
+generado utilizando el helper form_with añadiendo el modelo y debe implementar las
+clases de bootstrap (revisar docs) (1 Punto).
+● El formulario debe tener el campo para name, email y password y
+password_confirmation (0,5 Puntos).
+
+
+PicStory/app/views/users/new.html.erb
+
+<h1> Registrate </h1>
+<h3> para comenzar a contar tus historias </h3>
+
+<%= form_with(model: @user) do |f| %>
+    <div class= "mb-3">
+    <%= f.label :name, class: 'form-label' %>
+    <%= f.text_field :name, class: 'form-control' %>
+    </div>
+
+    <div class= "mb-3">
+    <%= f.label :email, class: 'form-label' %>
+    <%= f.email_field :email, class: 'form-control' %>
+    </div>
+
+    <div class= "mb-3">
+    <%= f.label :password, class: 'form-label' %>
+    <%= f.password_field :password, class: 'form-control' %>
+    </div>
+
+    <div class= "mb-3">
+    <%= f.label :password_confirmation, class: 'form-label' %>
+    <%= f.password_field :password_confirmation, class: 'form-control' %>
+    </div>
+
+    <%= f.submit "Registrarme", class: 'btn btn-primary'%>
+<%end%>
+
+
+En app/controllers/user_controller.rb
+
+class UserController < ApplicationRecord
+    def new
+        @user = User.new
+    end
+
+    def show
+    end
+
+    def create
+    end
+end
+
+
+
+
+
+
+● Crear el método user_params para permitir solo los atributos name, email y
+password (0,5 puntos).
+
+private
+  def user_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+end
+
+● En el controller users crear el método create. Este método debe generar una nueva
+instancia de User recibiendo como argumento user_params y almacenarlo en la BD.
+Luego, si el usuario es creado exitosamente, agregar @user.id a una variable de
+session (session[:user_id]) y redireccionar al root_path, en caso de error, que haga
+render del método new (1 Punto).
+
+ #POST/users/
+  def create 
+    @user = User.new(user_params)
+    if @user.save
+      #agregar a la cookie que tiene la variable de sesión
+      session[:user_id] = @user.id
+      #regresar al root_path
+      redirect_to root_path
+    else
+      render :new
+    end
+  end
+
+● Añadir rutas de sesiones para crear y destruir sesión de usuario. Usar los helpers en
+el navbar para iniciar y cerrar sesión (0,5 Puntos).
+
+resources :users, only: [:new, :create, :show]
+resources :sessions, only: [:new, :create, :destroy]
+
+● Crear el controlador de sesiones con los métodos new, create y destroy (1 Punto).
+
+rails g controller sessions new
+
+incluir en config/route.rb
+resources :sessions, only: [:new, :create, :destroy]
+
+
+En views/shared/_navbar.html.erb
+Copiar un navbar de Bootstrap y adaptarlo.
+
+Luego ir a app/views7layouts/application.html.erb
+y agregar 
+
+<body>
+    <%= render "shared/navbar" %>
+    <%= yield %>
+
+Para relacionar el navbar con el index
+
+
+
+en views/sessions/new.html.erb
+<h1>Bienvenido</h1>
+<p>Es hora de iniciar sesión</p>
+
+<%= form_with(url: 'sessions') do |f| %>
+    <div class="mb-3">
+        <%= f.label         :email, class: 'form-label' %>
+        <%= f.email_field   :email, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+        <%= f.label             :password, class: 'form-label' %>
+        <%= f.password_field    :password, class: 'form-control' %>
+    </div>
+
+    <%= f.submit "Ingresar", class: 'btn btn-primary' %>
+<% end %>
+
+
+● Crear los métodos current_user y logged? en ApplicationHelper. HINT (El método
+logged? debe indicar si está presente la llave :user_id en el hash de sesión) (0,5
+Puntos).
+
+En app/helpers/application_helper.rb
+
+   # obtener el usuario actual
+    def current_user
+        User.find(session[:user_id])
+    end
+    
+    # preguntar si hemos inicado sesión
+    def logged?   
+         session[:user_id] ? true : false
+         #if session[:user_id]
+         #  true
+         #else
+        #   false
+        #end
+    end
+
+
+● Completar los links del navbar para inicio de sesión y cerrar sesión (toggle entre
+ambos según la evaluación del helper logged?) (1 Punto).
+
+
+
+
+
+● En caso de que no exista ningún usuario logueado mostrar en el navbar links para
+registrarse e iniciar sesión (1 Punto).
+
+● El método destroy debe resetear las variables de sesión y redireccionar a la página
+root (0,5 Puntos).
+
+ [x] Añadir usuario actual a cada Story creada (Se requiere de migración para agregar la referencia a la tabla Stories y ajustar las relaciones de los modelos) (1 Punto).
+
+    # app/models/story.rb
+    class Story < ApplicationRecord
+    belongs_to :user
+    end
+
+    # app/models/user.rb
+    class User < ApplicationRecord
+        has_secure_password
+        has_many :stories
+        
+        validates :email, uniqueness: true
+    end
+
+
+● Crear vistas con las historias por usuario en el método show de user (1 Punto)
+
+En app/controllers/session_controller.rb
+
+ # DELETE /session/:id
+  # lógica para cerrar sesión
+
+  def destroy
+    session[:user_id] = nil
+    redirect_to root_path
+  end
+
+
+
+app/controlers/application.html.erb
+  class ApplicationController < ActionController::Base
+    #Método que permite validar la cookie
+    def necesito_estar_autenticado!
+        unless session[:user_id]
+            redirect_to root_path   #si no existe la cookie lo redireccionará a...
+        end
+    end
+end
+
+
+app/controllers/stories.html.erb
+Al principio del método agregamos:
+
+ before_action :necesito_estar_autenticado!, only: [:new, :edit, :create, :update, :destroy]
+
+
+app/controllers/sessions_controller.rb agregar al principio del método:
+
+before_action :necesito_estar_autenticado!, only: show
+
+app/controllers/users_controllers.rb agregamos al principio del método:
+before_action :necesito_estar_autenticado!, only: destroy

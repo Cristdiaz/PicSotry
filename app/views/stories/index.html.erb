@@ -1,0 +1,13 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Historias</h1>
+
+<div id="stories">
+  <% @stories.each do |story| %>
+    <%= render story %>
+    <p>
+      <%= link_to "Show this story", story %>
+    </p>
+  <% end %>
+</div>
+

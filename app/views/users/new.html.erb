@@ -1,0 +1,58 @@
+<!--<div class= "row justify-content"></div>-->
+
+
+
+<h1> Regístrate </h1>
+<h3> para comenzar a contar tus historias </h3>
+
+<!--Esto es para agregar un carrusel a la página del registro
+<div class= "banner-registro">
+    <%= render 'shared/carousel' %>
+    o 
+    <img src= "">
+</div>-->
+
+<%= form_with(model: @user) do |f| %>
+    <div class= "mb-3">
+        <%= f.label :name, class: 'form-label' %>
+        <%= f.text_field :name, class: 'form-control' %>
+        <% if @user.errors[:email].any? %>
+            <span class= "badge text-bg-warning p-2 mt-2">
+            <%= @user.errors[:email].first %>
+            </span>
+        <% end %>
+    </div>
+
+    <div class= "mb-3">
+        <%= f.label :email, class: 'form-label' %>
+        <%= f.email_field :email, class: 'form-control' %>
+        <% if @user.errors[:email].any? %>
+            <span class= "badge text-bg-warning p-2 mt-2">
+            <%= @user.errors[:email].first %>
+            </span>
+        <% end %>
+    </div>
+
+    <div class= "mb-3">
+        <%= f.label :password, class: 'form-label' %>
+        <%= f.password_field :password, class: 'form-control' %>
+         <% if @user.errors[:email].any? %>
+            <span class= "badge text-bg-warning p-2 mt-2">
+            <%= @user.errors[:email].first %>
+            </span>
+        <% end %>
+    </div>
+
+    <div class= "mb-3">
+        <%= f.label :password_confirmation, class: 'form-label' %>
+        <%= f.password_field :password_confirmation, class: 'form-control' %>
+         <% if @user.errors[:email].any? %>
+            <span class= "badge text-bg-warning p-2 mt-2">
+            <%= @user.errors[:email].first %>
+            </span>
+        <% end %>
+    </div>
+
+    <%= f.submit "Registrarme", class: 'btn btn-primary'%>
+<%end%>
+
